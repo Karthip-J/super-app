@@ -1,0 +1,20 @@
+chat.txt
+.env
+PAYMENT_MODULE_FIXES.md
+*.png
+*.jpg
+.cursorignore
+PAYMENT_IMPLEMENTATION_CHECKLIST.md
+
+# Rider App specific exclusions
+rider-app/.DS_Store
+rider-app/node_modules/
+rider-app/build/
+rider-app/.env
+rider-app/.env.local
+rider-app/.env.development.local
+rider-app/.env.test.local
+rider-app/.env.production.local
+
+# API Keys (temporary - should be moved to environment variables)
+rider-app/src/config/api.js

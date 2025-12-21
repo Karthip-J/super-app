@@ -1,0 +1,218 @@
+import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
+import Header from "../SubPages/Header";
+import step1 from "../Images/step1.svg";
+import gps from "../Images/gps.svg";
+import { useNavigate } from 'react-router-dom';
+
+function EditAddressValues() {
+    const [selected, setSelected] = useState("Home");
+    const navigate = useNavigate();
+    const location = useLocation();
+    const { address, index } = location.state || {};
+
+    // State variables for form fields, initialized with address data
+    const [fullName, setFullName] = useState(address?.fullName || '');
+    const [phoneNumber, setPhoneNumber] = useState(address?.phoneNumber || '');
+    const [altPhoneNumber, setAltPhoneNumber] = useState(address?.altPhoneNumber || '');
+    const [houseNo, setHouseNo] = useState(address?.houseNo || '');
+    const [roadName, setRoadName] = useState(address?.roadName || '');
+    const [landmark, setLandmark] = useState(address?.landmark || '');
+    const [city, setCity] = useState(address?.city || '');
+    const [state, setState] = useState(address?.state || '');
+    const [pincode, setPincode] = useState(address?.pincode || '');
+    // Additional address fields
+    const [country, setCountry] = useState(address?.country || '');
+    const [addressLine2, setAddressLine2] = useState(address?.addressLine2 || '');
+    const [companyName, setCompanyName] = useState(address?.companyName || '');
+    const [deliveryInstructions, setDeliveryInstructions] = useState(address?.deliveryInstructions || '');
+
+    useEffect(() => {
+        if (address?.selectedAddressType) {
+            setSelected(address.selectedAddressType);
+        }
+    }, [address]);
+
+    const handleUpdate = () => {
+        const updatedAddress = {
+            fullName,
+            phoneNumber,
+            altPhoneNumber,
+            houseNo,
+            addressLine2,
+            roadName,
+            landmark,
+            city,
+            state,
+            pincode,
+            country,
+            companyName,
+            deliveryInstructions,
+            selectedAddressType: selected
+        };
+
+        const existingAddresses = JSON.parse(localStorage.getItem('userAddresses')) || [];
+        existingAddresses[index] = updatedAddress;
+        localStorage.setItem('userAddresses', JSON.stringify(existingAddresses));
+        navigate('/home-grocery/edit-all-addresses', { replace: true });
+    };
+
+    const buttons = ["Home", "Office", "Others"];
+
+    return (
+        <div className='bg-[#F8F8F8] min-h-screen'>
+            <Header />
+            {/* <div className='border border-[#E1E1E1] py-4'>
+                <img src={step1} alt="" className='w-full mt-20 px-6' />
+            </div > */}
+            <div className="flex justify-between items-center px-4 pt-24">
+                <h2 className="text-base font-medium">Edit delivery address</h2>
+                <div className="flex items-center gap-2"> {/* Added flex, items-center & gap */}
+                    <span className='text-[#888888] text-xs font-normal'>Add Location</span>
+                    <img src={gps} alt="Close" className="cursor-pointer w-8 h-8" />
+                </div>
+            </div>
+            <div className='px-4 pb-16'>
+                <div className='pt-2'>
+                    <label className="mt-4 block text-sm text-gray-600 w-full">Full name</label>
+                    <input
+                        type="text"
+                        value={fullName}
+                        onChange={(e) => setFullName(e.target.value)}
+                        className="bg-white w-full p-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-[#5C3FFF] mt-1"
+                    />
+
+                    <label className="mt-4 block text-sm text-gray-600 w-full">Phone number</label>
+                    <input
+                        type="number"
+                        value={phoneNumber}
+                        onChange={(e) => setPhoneNumber(e.target.value)}
+                        className="bg-white w-full p-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-[#5C3FFF] mt-1"
+                    />
+
+                    <label className="mt-4 block text-sm text-gray-600 w-full">Alternative phone number</label>
+                    <input
+                        type="number"
+                        value={altPhoneNumber}
+                        onChange={(e) => setAltPhoneNumber(e.target.value)}
+                        className=" bg-white w-full p-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-[#5C3FFF] mt-1"
+                    />
+
+                    <label className="mt-4 block text-sm text-gray-600 w-full">House no, Building name*</label>
+                    <input
+                        type="text"
+                        value={houseNo}
+                        onChange={(e) => setHouseNo(e.target.value)}
+                        className="bg-white w-full p-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-[#5C3FFF] mt-1"
+                    />
+
+                    <label className="mt-4 block text-sm text-gray-600 w-full">Address Line 2 (Apartment, Suite, etc.)</label>
+                    <input
+                        type="text"
+                        value={addressLine2}
+                        onChange={(e) => setAddressLine2(e.target.value)}
+                        className="bg-white w-full p-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-[#5C3FFF] mt-1"
+                    />
+
+                    <label className="mt-4 block text-sm text-gray-600 w-full">Road name, Area, Colony*</label>
+                    <input
+                        type="text"
+                        value={roadName}
+                        onChange={(e) => setRoadName(e.target.value)}
+                        className="bg-white w-full p-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-[#5C3FFF] mt-1"
+                    />
+
+                    <label className="mt-4 block text-sm text-gray-600 w-full">Near by landmark*</label>
+                    <input
+                        type="text"
+                        value={landmark}
+                        onChange={(e) => setLandmark(e.target.value)}
+                        className="bg-white w-full p-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-[#5C3FFF] mt-1"
+                    />
+
+                    <div className="flex gap-x-4 mt-4">
+                        <div className="w-1/2">
+                            <label className="block text-sm text-gray-600">City*</label>
+                            <input
+                                type="text"
+                                value={city}
+                                onChange={(e) => setCity(e.target.value)}
+                                className="bg-white w-full p-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-[#5C3FFF] mt-1"
+                            />
+                        </div>
+                        <div className="w-1/2">
+                            <label className="block text-sm text-gray-600">State*</label>
+                            <input
+                                type="text"
+                                value={state}
+                                onChange={(e) => setState(e.target.value)}
+                                className="bg-white w-full p-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-[#5C3FFF] mt-1"
+                            />
+                        </div>
+                    </div>
+
+                    <div className="flex gap-x-4 mt-4">
+                        <div className="w-1/2">
+                            <label className="block text-sm text-gray-600">Pincode*</label>
+                            <input
+                                type="text"
+                                value={pincode}
+                                onChange={(e) => setPincode(e.target.value)}
+                                className="bg-white w-full p-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-[#5C3FFF] mt-1"
+                            />
+                        </div>
+                        <div className="w-1/2">
+                            <label className="block text-sm text-gray-600">Country</label>
+                            <input
+                                type="text"
+                                value={country}
+                                onChange={(e) => setCountry(e.target.value)}
+                                className="bg-white w-full p-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-[#5C3FFF] mt-1"
+                            />
+                        </div>
+                    </div>
+
+                    <label className="mt-4 block text-sm text-gray-600 w-full">Company Name (Optional)</label>
+                    <input
+                        type="text"
+                        value={companyName}
+                        onChange={(e) => setCompanyName(e.target.value)}
+                        className="bg-white w-full p-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-[#5C3FFF] mt-1"
+                    />
+
+                    <label className="mt-4 block text-sm text-gray-600 w-full">Delivery Instructions (Optional)</label>
+                    <textarea
+                        value={deliveryInstructions}
+                        onChange={(e) => setDeliveryInstructions(e.target.value)}
+                        className="bg-white w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#5C3FFF] mt-1"
+                        rows="3"
+                    />
+                </div>
+
+                <div className='font-medium text-base  pt-4'>Select Type</div>
+
+                <div className="flex space-x-2  pt-2">
+                    {buttons.map((btn) => (
+                        <button
+                            key={btn}
+                            onClick={() => setSelected(btn)}
+                            className={`px-4 py-1 rounded-full border ${selected === btn
+                                ? "bg-[#5C3FFF] text-white"
+                                : "bg-white text-black border-gray-300"
+                                }`}
+                        >
+                            {btn}
+                        </button>
+                    ))}
+                </div>
+                <button
+                    onClick={handleUpdate}
+                    className="w-full px-4 py-2 bg-[#5C3FFF] text-white rounded-[50px] mt-6" >
+                    Save Changes
+                </button>
+            </div>
+        </div>
+    )
+}
+
+export default EditAddressValues;

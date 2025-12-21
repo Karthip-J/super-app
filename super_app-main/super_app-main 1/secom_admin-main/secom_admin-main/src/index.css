@@ -1,0 +1,115 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+	:root {
+		/* Light theme colors */
+		--bg-primary: #ffffff;
+		--bg-secondary: #f8f9fa;
+		--bg-sidebar: #ffffff;
+		--bg-card: #ffffff;
+		--bg-table: #ffffff;
+		--bg-input: #ffffff;
+		--text-primary: #111111;
+		--text-secondary: #6b7280;
+		--text-muted: #9ca3af;
+		--border-color: #e5e7eb;
+		--border-light: #f3f4f6;
+		--shadow-color: rgba(0, 0, 0, 0.1);
+	}
+
+	.dark {
+		/* Dark theme colors */
+		--bg-primary: #0f172a;
+		--bg-secondary: #1e293b;
+		--bg-sidebar: #1e293b;
+		--bg-card: #1e293b;
+		--bg-table: #1e293b;
+		--bg-input: #1e293b;
+		--text-primary: #f5f5f5;
+		--text-secondary: #cbd5e1;
+		--text-muted: #94a3b8;
+		--border-color: #334155;
+		--border-light: #475569;
+		--shadow-color: rgba(0, 0, 0, 0.3);
+	}
+
+	html {
+		font-family: 'DM Sans', sans-serif !important;
+		font-feature-settings: 'kern' !important;
+		-webkit-font-smoothing: antialiased;
+		letter-spacing: -0.5px;
+		background-color: var(--bg-primary);
+		color: var(--text-primary);
+		transition: background-color 0.3s ease, color 0.3s ease;
+	}
+
+	body {
+		background-color: var(--bg-primary);
+		color: var(--text-primary);
+		transition: background-color 0.3s ease, color 0.3s ease;
+	}
+
+	/* Input placeholder colors */
+	input::placeholder,
+	textarea::placeholder {
+		color: var(--text-muted);
+		opacity: 0.7;
+	}
+
+	input:focus::placeholder,
+	textarea:focus::placeholder {
+		opacity: 0.5;
+	}
+
+	/* Custom Scrollbar Styles */
+	/* Webkit browsers (Chrome, Safari, Edge) */
+	::-webkit-scrollbar {
+		width: 12px;
+		height: 12px;
+	}
+
+	::-webkit-scrollbar-track {
+		background-color: var(--bg-secondary);
+		border-radius: 6px;
+	}
+
+	::-webkit-scrollbar-thumb {
+		background-color: var(--border-color);
+		border-radius: 6px;
+		border: 2px solid var(--bg-secondary);
+		transition: background-color 0.3s ease;
+	}
+
+	::-webkit-scrollbar-thumb:hover {
+		background-color: var(--text-secondary);
+	}
+
+	::-webkit-scrollbar-button {
+		display: none;
+	}
+
+	/* Firefox */
+	* {
+		scrollbar-width: thin;
+		scrollbar-color: var(--border-color) var(--bg-secondary);
+	}
+}
+
+input.defaultCheckbox::before {
+	content: url(../src/assets/svg/checked.svg); 
+	color: white;
+	opacity: 0; 
+	height: 16px; 
+	width: 16px;
+	position: absolute; 
+	left: 50%;
+	transform: translate(-50%, 0px);
+} 
+
+input:checked.defaultCheckbox::before { 
+	opacity: 1;
+}
