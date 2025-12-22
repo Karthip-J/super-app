@@ -21,7 +21,7 @@ router.route('/search')
   .get(searchServices);
 
 router.route('/seed')
-  .post(protect, authorize('admin'), seedUrbanServices);
+  .post(seedUrbanServices);
 
 router.route('/category/:categoryId')
   .get(getServicesByCategory);
