@@ -3,7 +3,7 @@ services:
     name: superapp-backend
     env: node
     repo: https://github.com/your-username/super-app-repo  # Replace with your GitHub repo
-    rootDir: super_app-main 1/node-backend
+    rootDir: super_app-main/super_app-main_1/node-backend
     buildCommand: npm install
     startCommand: npm start
     envVars:

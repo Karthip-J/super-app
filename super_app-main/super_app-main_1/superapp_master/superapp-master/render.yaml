@@ -3,7 +3,7 @@ services:
     name: superapp-frontend
     env: static
     repo: https://github.com/your-username/super-app-repo  # Replace with your GitHub repo
-    rootDir: super_app-main 1/superapp_master/superapp-master
+    rootDir: super_app-main/super_app-main_1/superapp_master/superapp-master
     buildCommand: npm run build
     publishPath: build
     envVars:

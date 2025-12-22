@@ -3,7 +3,7 @@ services:
     name: urban-partner-app
     env: static
     repo: https://github.com/your-username/super-app-repo  # Replace with your GitHub repo
-    rootDir: urban-partner-app
+    rootDir: super_app-main/urban-partner-app
     buildCommand: npm run build
     publishPath: build
     envVars:
