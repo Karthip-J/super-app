@@ -72,6 +72,7 @@ import RiderTable from "views/admin/Sidenav_pages/RiderTable";
 import QuickLinksTable from "views/admin/Sidenav_pages/QuickLinksTable";
 import UrbanServicesDashboard from "./components/UrbanServices/Dashboard";
 import ServiceCategories from "./components/UrbanServices/ServiceCategories";
+import AddService from "./components/UrbanServices/AddService";
 import ServicePartners from "./components/UrbanServices/ServicePartners";
 import ServiceBookings from "./components/UrbanServices/ServiceBookings";
 

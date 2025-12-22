@@ -30,6 +30,9 @@ const UrbanServicesHome = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const navigate = useNavigate();
 
+  // Base URL for API and images
+  const API_BASE_URL = 'http://localhost:3000';
+
   useEffect(() => {
     fetchCategories();
     detectLocation();
@@ -60,10 +63,14 @@ const UrbanServicesHome = () => {
 
   const fetchCategories = async () => {
     try {
+      console.log('Fetching categories from: /api/urban-services/categories?active=true');
       const response = await axios.get('/api/urban-services/categories?active=true');
+      console.log('Categories API response:', response);
+      console.log('Categories data:', response.data.data);
       setCategories(response.data.data);
     } catch (error) {
       console.error('Error fetching categories:', error);
+      console.error('Error response:', error.response);
     } finally {
       setLoading(false);
     }
@@ -260,9 +267,24 @@ const UrbanServicesHome = () => {
               >
                 <div className="aspect-[4/3] rounded-2xl bg-gray-100 mb-3 overflow-hidden">
                   {category.image ? (
-                    <img src={category.image} alt={category.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                    <img 
+                      src={category.image.startsWith('http') ? category.image : `${API_BASE_URL}${category.image}`} 
+                      alt={category.name} 
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                      onLoad={(e) => {
+                        console.log('Image loaded successfully:', e.target.src);
+                      }}
+                      onError={(e) => {
+                        console.log('Image failed to load:', e.target.src);
+                        e.target.onerror = null;
+                        e.target.style.display = 'none';
+                        if (e.target.nextSibling) {
+                          e.target.nextSibling.style.display = 'flex';
+                        }
+                      }}
+                    />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-gray-50">
+                   <div className="w-full h-full flex items-center justify-center bg-gray-50" style={{display: category.image ? 'none' : 'flex'}}>
                       <span className="text-4xl opacity-40">{category.icon || '🏠'}</span>
                     </div>
                   )}

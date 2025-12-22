@@ -36,6 +36,7 @@ const amenityRoutes = require('./routes/amenity.routes');
 const policyRoutes = require('./routes/policy.routes');
 const locationRoutes = require('./routes/location.routes');
 const faqRoutes = require('./routes/faq.routes');
+const uploadRoutes = require('./routes/upload.routes');
 const recentTaxiLocationRoutes = require('./routes/recentTaxiLocation.routes');
 
 // Payment module routes
@@ -183,6 +184,9 @@ app.use('/api/riders', riderRoutes);
 
 // Urban Services module routes
 app.use('/api/urban-services', urbanServicesRoutes);
+
+// Upload routes
+app.use('/api/upload', uploadRoutes);
 
 // Quick Links module routes
 app.use('/api/quick-links', quickLinkRoutes);
