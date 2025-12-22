@@ -27,7 +27,7 @@ services:
     autoDeploy: true
 
   - type: web
-    name: superapp-master
+    name: superapp-frontend
     env: static
     repo: https://github.com/Karthip-J/super-app
     rootDir: superapp-master
