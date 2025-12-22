@@ -3,7 +3,7 @@ services:
     name: superapp-backend
     env: node
     repo: https://github.com/Karthip-J/super-app
-    rootDir: super_app-main/super_app-main_1/node-backend
+    rootDir: super_app-main/super_app-main\ 1/node-backend
     buildCommand: npm install
     startCommand: npm start
     envVars:
@@ -30,7 +30,7 @@ services:
     name: superapp-frontend
     env: static
     repo: https://github.com/Karthip-J/super-app
-    rootDir: super_app-main/super_app-main_1/superapp_master/superapp-master
+    rootDir: super_app-main/super_app-main\ 1/superapp_master/superapp-master
     buildCommand: npm run build
     publishPath: build
     envVars:
