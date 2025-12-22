@@ -18,8 +18,8 @@ const API_CONFIG = {
     });
 
     if (isProduction) {
-      console.log('🔧 Using production URL: https://super-app-0ofo.onrender.com');
-      return 'https://super-app-0ofo.onrender.com';
+      console.log('🔧 Using production URL: https://super-app-1-do45.onrender.com');
+      return 'https://super-app-1-do45.onrender.com';
     }
 
     // Development fallback

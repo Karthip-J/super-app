@@ -75,7 +75,7 @@
     }
   ],
   "env": {
-    "REACT_APP_API_URL": "https://super-app-0ofo.onrender.com",
+    "REACT_APP_API_URL": "https://super-app-1-do45.onrender.com",
     "DISABLE_ESLINT_PLUGIN": "true",
     "GENERATE_SOURCEMAP": "false",
     "CI": "false",
