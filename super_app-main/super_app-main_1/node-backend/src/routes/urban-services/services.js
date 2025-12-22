@@ -6,7 +6,8 @@ const {
   updateService,
   deleteService,
   getServicesByCategory,
-  searchServices
+  searchServices,
+  seedUrbanServices
 } = require('../../controllers/urban-services/serviceController');
 const { protect, authorize } = require('../../middlewares/auth.middleware');
 
@@ -18,6 +19,9 @@ router.route('/')
 
 router.route('/search')
   .get(searchServices);
+
+router.route('/seed')
+  .post(protect, authorize('admin'), seedUrbanServices);
 
 router.route('/category/:categoryId')
   .get(getServicesByCategory);

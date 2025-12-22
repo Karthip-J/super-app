@@ -1,4 +1,5 @@
 const Service = require('../../models/urban-services/service');
+const ServiceCategory = require('../../models/urban-services/serviceCategory');
 const asyncHandler = require('express-async-handler');
 
 // @desc    Get all services
@@ -182,6 +183,108 @@ const searchServices = asyncHandler(async (req, res) => {
   });
 });
 
+// @desc    Seed urban services data
+// @route   POST /api/urban-services/services/seed
+// @access  Private/Admin
+const seedUrbanServices = asyncHandler(async (req, res) => {
+  const urbanServicesCategories = [
+    {
+      name: 'AC Service & Repair',
+      slug: 'ac-service-repair',
+      description: 'Professional AC installation, repair, and maintenance services',
+      icon: 'ac',
+      image: '/images/services/ac-service.jpg',
+      pricingType: 'fixed',
+      minPrice: 299,
+      maxPrice: 1999,
+      estimatedDuration: 90,
+      serviceAreas: ['All Cities'],
+      isActive: true,
+      sortOrder: 1
+    },
+    {
+      name: 'Washing Machine Service',
+      slug: 'washing-machine-service',
+      description: 'Expert washing machine repair and maintenance',
+      icon: 'washing-machine',
+      image: '/images/services/washing-machine.jpg',
+      pricingType: 'fixed',
+      minPrice: 249,
+      maxPrice: 1499,
+      estimatedDuration: 60,
+      serviceAreas: ['All Cities'],
+      isActive: true,
+      sortOrder: 2
+    },
+    {
+      name: 'Refrigerator Service',
+      slug: 'refrigerator-service',
+      description: 'Professional refrigerator repair and maintenance',
+      icon: 'refrigerator',
+      image: '/images/services/refrigerator.jpg',
+      pricingType: 'fixed',
+      minPrice: 349,
+      maxPrice: 1799,
+      estimatedDuration: 75,
+      serviceAreas: ['All Cities'],
+      isActive: true,
+      sortOrder: 3
+    },
+    {
+      name: 'Plumbing Services',
+      slug: 'plumbing-services',
+      description: 'Expert plumbing repair and installation services',
+      icon: 'plumbing',
+      image: '/images/services/plumbing.jpg',
+      pricingType: 'quote',
+      minPrice: 199,
+      maxPrice: 2999,
+      estimatedDuration: 120,
+      serviceAreas: ['All Cities'],
+      isActive: true,
+      sortOrder: 4
+    },
+    {
+      name: 'Electrical Services',
+      slug: 'electrical-services',
+      description: 'Professional electrical repair and installation',
+      icon: 'electrical',
+      image: '/images/services/electrical.jpg',
+      pricingType: 'quote',
+      minPrice: 299,
+      maxPrice: 3999,
+      estimatedDuration: 90,
+      serviceAreas: ['All Cities'],
+      isActive: true,
+      sortOrder: 5
+    }
+  ];
+
+  try {
+    // Clear existing categories
+    await ServiceCategory.deleteMany({});
+    console.log('Cleared existing Urban Services categories');
+
+    // Insert new categories
+    const insertedCategories = await ServiceCategory.insertMany(urbanServicesCategories);
+    console.log(`Inserted ${insertedCategories.length} Urban Services categories`);
+
+    res.json({
+      success: true,
+      message: `Successfully seeded ${insertedCategories.length} urban services categories`,
+      count: insertedCategories.length,
+      data: insertedCategories
+    });
+  } catch (error) {
+    console.error('Error seeding Urban Services:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error seeding urban services',
+      error: error.message
+    });
+  }
+});
+
 module.exports = {
   getServices,
   getServiceById,
@@ -189,5 +292,6 @@ module.exports = {
   updateService,
   deleteService,
   getServicesByCategory,
-  searchServices
+  searchServices,
+  seedUrbanServices
 };
