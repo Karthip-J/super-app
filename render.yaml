@@ -30,7 +30,7 @@ services:
     name: superapp-frontend
     env: static
     repo: https://github.com/Karthip-J/super-app
-    rootDir: superapp_master/superapp-master
+    rootDir: superapp
     buildCommand: npm run build
     publishPath: build
     envVars:
