@@ -5,6 +5,7 @@ import bannerFood from "../Images/HomeScreen/bannerFood.png";
 import bannerTaxi from "../Images/HomeScreen/bannerTaxi.png";
 import bannerGroceries from "../Images/HomeScreen/bannerGroceries.jpg";
 import bannerUrban from "../Images/HomeScreen/bannerUrban.png";
+import bannerCityMove from "../Images/HomeScreen/cityMoveBanner.png";
 import bellIcon from "../Images/HomeScreen/bellIcon.svg";
 import { useNavigate } from "react-router-dom";
 import { HiOutlineUser, HiOutlineLocationMarker } from "react-icons/hi";
@@ -17,8 +18,8 @@ const banners = [
   { img: bannerHotel, alt: "Hotel", path: "/home-hotel" },
   { img: bannerTaxi, alt: "Taxi", path: "/home-taxi" },
   {
-    img: "https://dom-website-prod-cdn-cms.porter.in/Desktop_2_5fd0d00dd3.webp",
-    alt: "Porter Banner",
+    img: bannerCityMove,
+    alt: "City Move",
     path: "/porter",
   },
 ];
@@ -143,15 +144,14 @@ const HomeScreen = () => {
             </div>
           </div>
 
-          {/* Porter (Middle - Wide Rectangle) */}
           <div
             className="col-span-2 row-span-1 relative rounded-[2rem] overflow-hidden shadow-xl transition-all duration-300 hover:scale-[1.01] active:scale-95 cursor-pointer bg-white group border-2 border-white/30"
             onClick={() => navigate("/porter")}
           >
             <div className="absolute inset-0 bg-gradient-to-r from-blue-600/90 via-blue-600/40 to-transparent z-10" />
-            <img src="https://dom-website-prod-cdn-cms.porter.in/Desktop_2_5fd0d00dd3.webp" alt="Porter" className="w-full h-full object-cover transform transition-transform duration-700 group-hover:scale-110" />
+            <img src={bannerCityMove} alt="City Move" className="w-full h-full object-cover transform transition-transform duration-700 group-hover:scale-110" />
             <div className="absolute inset-y-0 left-0 z-20 flex flex-col justify-center p-8">
-              <h2 className="text-white text-3xl font-black tracking-tighter uppercase leading-none">Porter</h2>
+              <h2 className="text-white text-3xl font-black tracking-tighter uppercase leading-none">City Move</h2>
               <p className="text-white/80 text-[10px] font-bold uppercase tracking-widest mt-1">Instant Delivery</p>
             </div>
           </div>

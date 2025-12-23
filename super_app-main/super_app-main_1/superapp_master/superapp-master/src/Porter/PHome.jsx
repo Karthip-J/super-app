@@ -105,7 +105,7 @@ const PHome = () => {
         setFare(null);
         return;
       }
-      
+
       console.log('Calculating distance between:', pickupCoords, 'and', dropCoords);
       setLoadingDistance(true);
       try {
@@ -128,15 +128,15 @@ const PHome = () => {
         const lon1 = pickupCoords[0];
         const lat2 = dropCoords[1];
         const lon2 = dropCoords[0];
-        
+
         // Haversine formula for distance calculation
         const R = 6371; // Earth's radius in km
         const dLat = (lat2 - lat1) * Math.PI / 180;
         const dLon = (lon2 - lon1) * Math.PI / 180;
-        const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-                  Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-                  Math.sin(dLon/2) * Math.sin(dLon/2);
-        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+          Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+          Math.sin(dLon / 2) * Math.sin(dLon / 2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
         const fallbackDistance = Math.round(R * c * 100) / 100;
         // Limit fallback distance to reasonable range (max 50 km for testing)
         const limitedFallbackDistance = Math.min(fallbackDistance, 50);
@@ -174,7 +174,7 @@ const PHome = () => {
       // If coordinates aren't set, use default coordinates for testing
       let finalPickupCoords = pickupCoords;
       let finalDropCoords = dropCoords;
-      
+
       // Calculate distance if not already calculated
       if (!distance && selectedVehicle) {
         if (!pickupCoords && pickupLocation) {
@@ -182,34 +182,34 @@ const PHome = () => {
           finalPickupCoords = [77.8256, 12.7396];
           console.log('Using default coordinates for pickup:', finalPickupCoords);
         }
-        
+
         if (!dropCoords && dropLocation) {
           // Default coordinates for Chennai (approximate)
           finalDropCoords = [80.2707, 13.0827];
           console.log('Using default coordinates for drop:', finalDropCoords);
         }
-        
+
         // Calculate distance manually
         if (finalPickupCoords && finalDropCoords) {
           const lat1 = finalPickupCoords[1];
           const lon1 = finalPickupCoords[0];
           const lat2 = finalDropCoords[1];
           const lon2 = finalDropCoords[0];
-          
+
           // Haversine formula for distance calculation
           const R = 6371; // Earth's radius in km
           const dLat = (lat2 - lat1) * Math.PI / 180;
           const dLon = (lon2 - lon1) * Math.PI / 180;
-          const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-                    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-                    Math.sin(dLon/2) * Math.sin(dLon/2);
-          const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+          const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+            Math.sin(dLon / 2) * Math.sin(dLon / 2);
+          const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
           const calculatedDistance = Math.round(R * c * 100) / 100;
           const limitedDistance = Math.min(calculatedDistance, 50);
-          
+
           console.log('Manual distance calculation:', limitedDistance, 'km');
           setDistance(limitedDistance);
-          
+
           // Calculate fare immediately
           const baseFares = {
             "Bike": 50,
@@ -220,24 +220,24 @@ const PHome = () => {
           const perKmFare = Math.ceil(limitedDistance) * selectedVehicle.rate;
           const totalFare = baseFare + perKmFare;
           const limitedFare = Math.min(totalFare, 2000);
-          
+
           console.log('Manual fare calculation:', limitedFare, 'rupees');
           setFare(limitedFare);
         }
       }
-      
+
       if (!pickupCoords && pickupLocation) {
         // Default coordinates for Hosur (approximate)
         finalPickupCoords = [77.8256, 12.7396];
         console.log('Using default coordinates for pickup:', finalPickupCoords);
       }
-      
+
       if (!dropCoords && dropLocation) {
         // Default coordinates for Chennai (approximate)
         finalDropCoords = [80.2707, 13.0827];
         console.log('Using default coordinates for drop:', finalDropCoords);
       }
-      
+
       const bookingPayload = {
         pickup_location: {
           address: pickupLocation,
@@ -255,7 +255,7 @@ const PHome = () => {
         // Optionally: item_description, item_weight, special_instructions
       };
       console.log('Submitting booking with payload:', bookingPayload);
-      
+
       // Store booking data and show payment modal
       setBookingData(bookingPayload);
       setShowPaymentModal(true);
@@ -275,11 +275,11 @@ const PHome = () => {
 
     if (selectedPaymentMethod === 'razorpay') {
       try {
-        console.log('📦 Starting Razorpay payment for porter booking...');
+        console.log('📦 Starting Razorpay payment for city move booking...');
         const paymentData = {
           amount: fare || 100,
           currency: 'INR',
-          order_model: 'PorterBooking',
+          order_model: 'CityMoveBooking',
           order_data: {
             user_id: '507f1f77bcf86cd799439011', // Default user ID
             driver_id: '507f1f77bcf86cd799439011',
@@ -296,15 +296,15 @@ const PHome = () => {
 
         await paymentService.processPayment(paymentData, {
           onSuccess: (successData) => {
-            console.log('✅ Porter payment successful:', successData);
+            console.log('✅ City Move payment successful:', successData);
             showToast('Payment successful! Booking confirmed.', 'success');
-            navigate('/porter/tracking', { 
-              state: { 
-                ...bookingData, 
+            navigate('/porter/tracking', {
+              state: {
+                ...bookingData,
                 payment_method: 'Razorpay',
                 payment_id: successData.payment_id,
                 status: 'assigned'
-              } 
+              }
             });
           },
           onError: (error) => {
@@ -317,7 +317,7 @@ const PHome = () => {
           }
         });
       } catch (error) {
-        console.error('❌ Porter payment error:', error);
+        console.error('❌ City Move payment error:', error);
         showToast('Payment error: ' + error.message, 'error');
       }
     } else {
@@ -343,14 +343,13 @@ const PHome = () => {
     <div className="min-h-screen bg-gray-50">
       {/* Custom Toast Notification */}
       {toast.show && (
-        <div className={`fixed top-20 right-4 z-50 px-6 py-3 rounded-lg shadow-lg transform transition-all duration-300 ${
-          toast.type === 'success' 
-            ? 'bg-green-500 text-white' 
+        <div className={`fixed top-20 right-4 z-50 px-6 py-3 rounded-lg shadow-lg transform transition-all duration-300 ${toast.type === 'success'
+            ? 'bg-green-500 text-white'
             : 'bg-red-500 text-white'
-        }`}>
+          }`}>
           <div className="flex items-center space-x-2">
             <span className="font-medium">{toast.message}</span>
-            <button 
+            <button
               onClick={() => setToast({ show: false, message: '', type: 'success' })}
               className="ml-2 text-white hover:text-gray-200"
             >
@@ -359,11 +358,10 @@ const PHome = () => {
           </div>
         </div>
       )}
-      
-      {/* Banner */}
+
       <img
-        src="https://images.unsplash.com/photo-1511379938547-c1f69419868d?auto=format&fit=crop&w=800&q=80"
-        alt="Banner"
+        src="https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&w=1200&q=80"
+        alt="City Move Banner"
         className="w-full object-cover h-64"
       />
 
@@ -399,11 +397,10 @@ const PHome = () => {
                   type="button"
                   key={i}
                   onClick={() => setSelectedVehicle(v)}
-                  className={`px-4 py-2 border rounded transition-colors duration-150 ${
-                    selectedVehicle?.type === v.type
+                  className={`px-4 py-2 border rounded transition-colors duration-150 ${selectedVehicle?.type === v.type
                       ? "bg-blue-600 text-white border-blue-600"
                       : "bg-gray-100 border-gray-300 text-gray-700"
-                  }`}
+                    }`}
                 >
                   {v.type}
                 </button>

@@ -2,12 +2,12 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import paymentService from '../services/paymentService';
 
-const PaymentSuccess = ({ 
-  paymentData, 
-  orderData, 
-  onContinue, 
+const PaymentSuccess = ({
+  paymentData,
+  orderData,
+  onContinue,
   showDetails = true,
-  className = '' 
+  className = ''
 }) => {
   const navigate = useNavigate();
 
@@ -74,7 +74,7 @@ const PaymentSuccess = ({
       'GroceryOrder': 'Grocery Order',
       'Booking': 'Hotel Booking',
       'TaxiRide': 'Taxi Ride',
-      'PorterBooking': 'Porter Service'
+      'PorterBooking': 'City Move Service'
     };
     return typeMap[orderData?.order_model] || 'Order';
   };
@@ -167,14 +167,14 @@ const PaymentSuccess = ({
             View Order Details
           </button>
         )}
-        
+
         <button
           onClick={handleContinue}
           className="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-4 rounded-lg transition-colors duration-200"
         >
           Continue Shopping
         </button>
-        
+
         <button
           onClick={() => navigate('/')}
           className="w-full border border-gray-300 text-gray-700 hover:bg-gray-50 font-medium py-3 px-4 rounded-lg transition-colors duration-200"

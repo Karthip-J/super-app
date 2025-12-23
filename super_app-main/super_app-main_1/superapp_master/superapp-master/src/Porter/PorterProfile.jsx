@@ -19,7 +19,7 @@ const PorterProfile = () => {
             className="w-28 h-28 rounded-full border-4 border-blue-200 shadow mb-4"
           />
           <h2 className="text-2xl font-bold text-gray-800 mb-1">{user.name}</h2>
-          <div className="text-gray-500 mb-2">Porter User</div>
+          <div className="text-gray-500 mb-2">City Move User</div>
           <div className="w-full mt-4 space-y-2">
             <div className="flex items-center justify-between">
               <span className="font-semibold text-gray-700">Phone:</span>
