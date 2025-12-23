@@ -13,7 +13,6 @@ import HomeC from '../Clothes/Pages/HomeC';
 import UrbanServicesHome from '../UrbanServices/Pages/UrbanServicesHome';
 import BookService from '../UrbanServices/Pages/BookService';
 import BookingTracking from '../UrbanServices/Pages/BookingTracking';
-import UrbanServicesAdmin from '../UrbanServices/Pages/UrbanServicesAdmin';
 import UrbanServicesPartner from '../UrbanServices/Pages/UrbanServicesPartner';
 import UrbanServicesSettings from '../UrbanServices/Pages/UrbanServicesSettings';
 
@@ -349,8 +348,7 @@ function Navbar() {
           <Route path='/urban-services' element={<ProtectedRoute><UrbanServicesHome /></ProtectedRoute>} />
           <Route path='/urban-services/category/:slug' element={<ProtectedRoute><BookService /></ProtectedRoute>} />
           <Route path='/urban-services/booking/:bookingId' element={<ProtectedRoute><BookingTracking /></ProtectedRoute>} />
-          <Route path='/urban-services/admin' element={<ProtectedRoute><UrbanServicesAdmin /></ProtectedRoute>} />
-          <Route path='/urban-services/partner' element={<ProtectedRoute><UrbanServicesPartner /></ProtectedRoute>} />
+                    <Route path='/urban-services/partner' element={<ProtectedRoute><UrbanServicesPartner /></ProtectedRoute>} />
           <Route path='/urban-services/settings' element={<ProtectedRoute><UrbanServicesSettings /></ProtectedRoute>} />
           <Route path='/settings' element={<ProtectedRoute><UrbanServicesSettings /></ProtectedRoute>} />
 

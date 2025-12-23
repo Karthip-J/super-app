@@ -10,7 +10,8 @@ import { useNavigate } from "react-router-dom";
 import { HiOutlineUser, HiOutlineLocationMarker } from "react-icons/hi";
 
 const banners = [
-  { img: bannerClothes, alt: "Clothes", path: "/home-clothes" },
+  { img: bannerUrban, alt: "City Serve", path: "/urban-services" },
+  { img: bannerClothes, alt: "E-commerce", path: "/home-clothes" },
   { img: bannerGroceries, alt: "Grocery", path: "/home-grocery" },
   { img: bannerFood, alt: "Food", path: "/home-food" },
   { img: bannerHotel, alt: "Hotel", path: "/home-hotel" },
@@ -19,11 +20,6 @@ const banners = [
     img: "https://dom-website-prod-cdn-cms.porter.in/Desktop_2_5fd0d00dd3.webp",
     alt: "Porter Banner",
     path: "/porter",
-  },
-  {
-    img: bannerUrban,
-    alt: "City Bell",
-    path: "/urban-services",
   },
 ];
 
@@ -110,16 +106,16 @@ const HomeScreen = () => {
 
       <main className="flex-1 w-full max-w-md mx-auto px-4 py-8">
         <div className="grid grid-cols-2 gap-4 auto-rows-[140px]">
-          {/* Hero Banner: Urban Services (Top - Large Square/Vertical) */}
+          {/* Hero Banner: Grocery (Now at the top) */}
           <div
             className="col-span-2 row-span-2 relative rounded-[2rem] overflow-hidden shadow-2xl transition-all duration-300 hover:scale-[1.01] active:scale-95 cursor-pointer bg-white group border-4 border-white/50"
-            onClick={() => navigate("/urban-services")}
+            onClick={() => navigate("/home-grocery")}
           >
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/20 z-10" />
-            <img src={bannerUrban} alt="Urban Services" className="w-full h-full object-cover transform transition-transform duration-700 group-hover:scale-110" />
-            <div className="absolute bottom-0 left-0 right-0 z-20 p-6">
-              <h2 className="text-white text-3xl font-black tracking-tighter uppercase drop-shadow-lg">City Bell</h2>
-              <p className="text-white/80 text-xs font-medium uppercase tracking-widest mt-1">Experts at your door</p>
+            <div className="absolute inset-0 bg-gradient-to-t from-green-700/80 via-transparent to-green-700/20 z-10" />
+            <img src={bannerGroceries} alt="Grocery" className="w-full h-full object-cover transform transition-transform duration-700 group-hover:scale-110" />
+            <div className="absolute bottom-0 left-0 right-0 z-20 p-8">
+              <h2 className="text-white text-4xl font-black tracking-tighter uppercase drop-shadow-lg leading-none">Grocery</h2>
+              <p className="text-white/80 text-xs font-medium uppercase tracking-widest mt-2">Fresh & Local delivered fast</p>
             </div>
           </div>
 
@@ -129,9 +125,9 @@ const HomeScreen = () => {
             onClick={() => navigate("/home-clothes")}
           >
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent z-10" />
-            <img src={bannerClothes} alt="Clothes" className="w-full h-full object-cover transform transition-transform duration-700 group-hover:scale-110" />
+            <img src={bannerClothes} alt="E-commerce" className="w-full h-full object-cover transform transition-transform duration-700 group-hover:scale-110" />
             <div className="absolute bottom-4 left-4 z-20">
-              <h2 className="text-white text-lg font-black tracking-tight uppercase">Clothes</h2>
+              <h2 className="text-white text-lg font-black tracking-tight uppercase">E-commerce</h2>
             </div>
           </div>
 
@@ -147,16 +143,16 @@ const HomeScreen = () => {
             </div>
           </div>
 
-          {/* Grocery (Wide Rectangle) */}
+          {/* Porter (Middle - Wide Rectangle) */}
           <div
             className="col-span-2 row-span-1 relative rounded-[2rem] overflow-hidden shadow-xl transition-all duration-300 hover:scale-[1.01] active:scale-95 cursor-pointer bg-white group border-2 border-white/30"
-            onClick={() => navigate("/home-grocery")}
+            onClick={() => navigate("/porter")}
           >
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent z-10" />
-            <img src={bannerGroceries} alt="Grocery" className="w-full h-full object-cover transform transition-transform duration-700 group-hover:scale-110" />
-            <div className="absolute bottom-5 left-6 z-20">
-              <h2 className="text-white text-2xl font-black tracking-tight uppercase">Grocery</h2>
-              <p className="text-white/70 text-[10px] font-bold uppercase tracking-widest leading-none">Fresh & Local</p>
+            <div className="absolute inset-0 bg-gradient-to-r from-blue-600/90 via-blue-600/40 to-transparent z-10" />
+            <img src="https://dom-website-prod-cdn-cms.porter.in/Desktop_2_5fd0d00dd3.webp" alt="Porter" className="w-full h-full object-cover transform transition-transform duration-700 group-hover:scale-110" />
+            <div className="absolute inset-y-0 left-0 z-20 flex flex-col justify-center p-8">
+              <h2 className="text-white text-3xl font-black tracking-tighter uppercase leading-none">Porter</h2>
+              <p className="text-white/80 text-[10px] font-bold uppercase tracking-widest mt-1">Instant Delivery</p>
             </div>
           </div>
 
@@ -184,16 +180,16 @@ const HomeScreen = () => {
             </div>
           </div>
 
-          {/* Porter (Wide/Tall Mixed) */}
+          {/* City Serve (Bottom - Wide Rectangle) */}
           <div
-            className="col-span-2 row-span-1 relative rounded-[2rem] overflow-hidden shadow-xl transition-all duration-300 hover:scale-[1.01] active:scale-95 cursor-pointer bg-white group border-2 border-white/30"
-            onClick={() => navigate("/porter")}
+            className="col-span-2 row-span-1 border-2 border-white/30 relative rounded-[2rem] overflow-hidden shadow-xl transition-all duration-300 hover:scale-[1.01] active:scale-95 cursor-pointer bg-white group"
+            onClick={() => navigate("/urban-services")}
           >
-            <div className="absolute inset-0 bg-gradient-to-r from-blue-600/90 via-blue-600/40 to-transparent z-10" />
-            <img src="https://dom-website-prod-cdn-cms.porter.in/Desktop_2_5fd0d00dd3.webp" alt="Porter" className="w-full h-full object-cover transform transition-transform duration-700 group-hover:scale-110" />
+            <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent z-10" />
+            <img src={bannerUrban} alt="City Serve" className="w-full h-full object-cover transform transition-transform duration-700 group-hover:scale-110" />
             <div className="absolute inset-y-0 left-0 z-20 flex flex-col justify-center p-8">
-              <h2 className="text-white text-3xl font-black tracking-tighter uppercase leading-none">Porter</h2>
-              <p className="text-white/80 text-[10px] font-bold uppercase tracking-widest mt-1">Instant Delivery</p>
+              <h2 className="text-white text-3xl font-black tracking-tighter uppercase leading-none">City Serve</h2>
+              <p className="text-white/80 text-[10px] font-bold uppercase tracking-widest mt-1">Experts at your door</p>
             </div>
           </div>
         </div>

@@ -57,14 +57,14 @@ function HomeC() {
 
     // Category Icons with Flipkart-style circles
     const categoryIcons = [
-        { name: 'Top Offers', icon: 'https://rukminim2.flixcart.com/fk-p-flap/64/64/image/698ba0ce2c884044.jpg?q=100' },
-        { name: 'Mobiles', icon: 'https://rukminim2.flixcart.com/flap/64/64/image/22fddf3c7da4c4f4.png?q=100' },
-        { name: 'Electronics', icon: 'https://rukminim2.flixcart.com/flap/64/64/image/69cff05553af23a4.png?q=100' },
-        { name: 'Fashion', icon: 'https://rukminim2.flixcart.com/flap/64/64/image/82b3ca5fb2301045.png?q=100' },
-        { name: 'Home', icon: 'https://rukminim2.flixcart.com/flap/64/64/image/ab7e2c021d97a8e2.png?q=100' },
-        { name: 'Beauty', icon: 'https://rukminim2.flixcart.com/flap/64/64/image/dff3f7adcf3a90c6.png?q=100' },
-        { name: 'Furniture', icon: 'https://rukminim2.flixcart.com/flap/64/64/image/ee162bad96f476ae.png?q=100' },
-        { name: 'Grocery', icon: 'https://rukminim2.flixcart.com/flap/64/64/image/29327f40e9c4d26b.png?q=100' },
+        { name: 'Top Offers', icon: 'https://rukminim2.flixcart.com/fk-p-flap/64/64/image/698ba0ce2c884044.jpg?q=100', slug: 'top-offers' },
+        { name: 'Mobiles', icon: 'https://rukminim2.flixcart.com/flap/64/64/image/22fddf3c7da4c4f4.png?q=100', slug: 'mobiles' },
+        { name: 'Electronics', icon: 'https://rukminim2.flixcart.com/flap/64/64/image/69cff05553af23a4.png?q=100', slug: 'electronics' },
+        { name: 'Fashion', icon: 'https://rukminim2.flixcart.com/flap/64/64/image/82b3ca5fb2301045.png?q=100', slug: 'mens-wear' },
+        { name: 'Home', icon: 'https://rukminim2.flixcart.com/flap/64/64/image/ab7e2c021d97a8e2.png?q=100', slug: 'home-appliances' },
+        { name: 'Beauty', icon: 'https://rukminim2.flixcart.com/flap/64/64/image/dff3f7adcf3a90c6.png?q=100', slug: 'cosmetics' },
+        { name: 'Furniture', icon: 'https://rukminim2.flixcart.com/flap/64/64/image/ee162bad96f476ae.png?q=100', slug: 'furniture' },
+        { name: 'Grocery', icon: 'https://rukminim2.flixcart.com/flap/64/64/image/29327f40e9c4d26b.png?q=100', slug: 'grocery' },
     ];
 
     useEffect(() => {
@@ -154,9 +154,28 @@ function HomeC() {
                 <div className="bg-white shadow-sm mb-2 overflow-x-auto no-scrollbar">
                     <div className="max-w-[1248px] mx-auto flex justify-between items-center py-3 px-4 md:px-10 min-w-max gap-8 md:gap-0">
                         {categoryIcons.map((cat, idx) => (
-                            <div key={idx} className="flex flex-col items-center gap-1 group cursor-pointer shrink-0">
+                            <div
+                                key={idx}
+                                className="flex flex-col items-center gap-1 group cursor-pointer shrink-0"
+                                onClick={() => {
+                                    if (cat.slug === 'grocery') {
+                                        navigate('/home-grocery');
+                                    } else if (cat.slug === 'top-offers') {
+                                        navigate('/home-clothes');
+                                    } else {
+                                        navigate(`/categories/${cat.slug}`);
+                                    }
+                                }}
+                            >
                                 <div className="w-12 h-12 md:w-16 md:h-16 flex items-center justify-center">
-                                    <img src={cat.icon} alt={cat.name} className="w-full h-full object-contain group-hover:scale-105 transition-transform" />
+                                    <img
+                                        src={cat.icon}
+                                        alt={cat.name}
+                                        className="w-full h-full object-contain group-hover:scale-105 transition-transform"
+                                        onError={(e) => {
+                                            e.target.src = 'https://via.placeholder.com/64?text=' + cat.name;
+                                        }}
+                                    />
                                 </div>
                                 <span className="text-[12px] md:text-[14px] font-medium text-gray-800 group-hover:text-[#2874F0]">{cat.name}</span>
                             </div>

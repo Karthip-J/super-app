@@ -7,7 +7,7 @@ const UrbanServicesNav = () => {
   return (
     <div className="bg-blue-600 text-white p-4 rounded-lg shadow-lg mb-6">
       <div className="max-w-7xl mx-auto">
-        <h2 className="text-xl font-bold mb-3">City Bell Management</h2>
+        <h2 className="text-xl font-bold mb-3">City Bell</h2>
         <div className="flex flex-wrap gap-3">
           <button
             onClick={() => navigate('/urban-services')}

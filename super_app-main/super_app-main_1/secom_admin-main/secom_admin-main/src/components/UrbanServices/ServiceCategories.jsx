@@ -1,6 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import API_CONFIG from '../../config/api.config';
+import {
+  FaSync,
+  FaPlus,
+  FaEdit,
+  FaTrash,
+  FaCrown,
+  FaCheckCircle,
+  FaExclamationCircle,
+  FaImage,
+  FaArrowRight,
+  FaSearch
+} from 'react-icons/fa';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const ServiceCategories = () => {
   const [categories, setCategories] = useState([]);
@@ -8,6 +21,7 @@ const ServiceCategories = () => {
   const [showModal, setShowModal] = useState(false);
   const [expandedCategories, setExpandedCategories] = useState(new Set());
   const [categoryServices, setCategoryServices] = useState({});
+  const [searchTerm, setSearchTerm] = useState('');
   const [formData, setFormData] = useState({
     name: '',
     slug: '',
@@ -28,6 +42,18 @@ const ServiceCategories = () => {
   const [error, setError] = useState('');
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState('');
+  const [syncing, setSyncing] = useState(false);
+
+  const defaultHeroCategories = [
+    { name: "Women's Salon & Spa", slug: 'salon-for-women', description: 'Beauty & wellness services', icon: 'scissors', color: 'bg-pink-50 text-pink-500' },
+    { name: "Men's Salon & Massage", slug: 'salon-for-men', description: 'Grooming & relaxation', icon: 'scissors', color: 'bg-blue-50 text-blue-500' },
+    { name: 'AC & Appliance Repair', slug: 'appliance-repair', description: 'Expert repair services', icon: 'tv', color: 'bg-orange-50 text-orange-500' },
+    { name: 'Cleaning & Pest Control', slug: 'cleaning', description: 'Deep cleaning & pest control', icon: 'sparkles', color: 'bg-green-50 text-green-500' },
+    { name: 'Electrician, Plumber & Carpenter', slug: 'home-repairs', description: 'Home repair experts', icon: 'wrench', color: 'bg-indigo-50 text-indigo-500' },
+    { name: 'Painting & Wall Treatment', slug: 'painting', description: 'Professional painting services', icon: 'droplets', color: 'bg-yellow-50 text-yellow-500' },
+    { name: 'Water Purifier & RO Service', slug: 'water-purifier', description: 'Water purification services', icon: 'droplets', color: 'bg-cyan-50 text-cyan-500' },
+    { name: 'General Home Maintenance', slug: 'home-maintenance', description: 'Complete home care', icon: 'home', color: 'bg-purple-50 text-purple-500' },
+  ];
 
   useEffect(() => {
     fetchCategories();
@@ -35,46 +61,59 @@ const ServiceCategories = () => {
 
   const fetchCategories = async () => {
     try {
-      console.log('Fetching categories...');
+      setLoading(true);
       const response = await axios.get(`${API_CONFIG.BASE_URL}/api/urban-services/categories`);
-      console.log('Categories response:', response.data);
       setCategories(response.data.data || []);
     } catch (error) {
       console.error('Error fetching categories:', error);
-      console.error('Error response:', error.response?.data);
     } finally {
       setLoading(false);
     }
   };
 
-  const fetchServicesForCategory = async (categoryId) => {
-    try {
-      console.log(`Fetching services for category: ${categoryId}`);
-      const response = await axios.get(`${API_CONFIG.BASE_URL}/api/urban-services/services?category=${categoryId}`);
-      console.log('Services response:', response.data);
-      setCategoryServices(prev => ({
-        ...prev,
-        [categoryId]: response.data.data || []
-      }));
-    } catch (error) {
-      console.error('Error fetching services:', error);
-      console.error('Error response:', error.response?.data);
+  const syncDefaultCategories = async () => {
+    if (!window.confirm('This will add any missing hero categories to your database. Continue?')) {
+      return;
     }
-  };
 
-  const toggleCategoryExpansion = async (categoryId) => {
-    const newExpanded = new Set(expandedCategories);
-    
-    if (newExpanded.has(categoryId)) {
-      newExpanded.delete(categoryId);
-    } else {
-      newExpanded.add(categoryId);
-      if (!categoryServices[categoryId]) {
-        await fetchServicesForCategory(categoryId);
+    setSyncing(true);
+    try {
+      const token = localStorage.getItem('token') || localStorage.getItem('authToken');
+      let createdCount = 0;
+
+      for (const cat of defaultHeroCategories) {
+        const exists = categories.find(c => c.slug === cat.slug);
+        if (!exists) {
+          const catToCreate = {
+            ...cat,
+            pricingType: 'fixed',
+            minPrice: 499,
+            maxPrice: 2999,
+            estimatedDuration: 60,
+            serviceAreas: ['All Cities'],
+            isActive: true
+          };
+          delete catToCreate.color; // Frontend only property
+
+          await axios.post(`${API_CONFIG.BASE_URL}/api/urban-services/categories`, catToCreate, {
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+          createdCount++;
+        }
       }
+
+      if (createdCount > 0) {
+        alert(`Successfully synced ${createdCount} categories!`);
+        fetchCategories();
+      } else {
+        alert('All hero categories are already in the database.');
+      }
+    } catch (error) {
+      console.error('Error syncing categories:', error);
+      alert('Failed to sync. Please try again.');
+    } finally {
+      setSyncing(false);
     }
-    
-    setExpandedCategories(newExpanded);
   };
 
   const handleInputChange = (e) => {
@@ -100,11 +139,11 @@ const ServiceCategories = () => {
   const uploadImage = async (file) => {
     const formData = new FormData();
     formData.append('image', file);
-    
+
     try {
       const token = localStorage.getItem('token') || localStorage.getItem('authToken');
       const response = await axios.post(`${API_CONFIG.BASE_URL}/api/upload/image`, formData, {
-        headers: { 
+        headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'multipart/form-data'
         }
@@ -118,39 +157,24 @@ const ServiceCategories = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Form submitted with data:', formData);
-    console.log('Image file:', imageFile);
-    console.log('Editing category:', editingCategory);
-    
     setSubmitting(true);
     setError('');
 
     try {
       let imageUrl = formData.image;
-      
-      // Upload image if a new file is selected
       if (imageFile) {
-        console.log('Uploading image...');
         imageUrl = await uploadImage(imageFile);
-        console.log('Image uploaded successfully:', imageUrl);
       }
 
       const token = localStorage.getItem('token') || localStorage.getItem('authToken');
-      const categoryData = {
-        ...formData,
-        image: imageUrl
-      };
-      
-      console.log('Category data:', categoryData);
-      
+      const categoryData = { ...formData, image: imageUrl };
+
       let response;
       if (editingCategory) {
-        // Update existing category
         response = await axios.put(`${API_CONFIG.BASE_URL}/api/urban-services/categories/${editingCategory._id}`, categoryData, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
       } else {
-        // Create new category
         response = await axios.post(`${API_CONFIG.BASE_URL}/api/urban-services/categories`, categoryData, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
@@ -159,28 +183,9 @@ const ServiceCategories = () => {
       if (response.data.success) {
         setShowModal(false);
         setEditingCategory(null);
-        setFormData({ 
-          name: '', 
-          slug: '',
-          description: '', 
-          icon: '',
-          image: '',
-          pricingType: 'fixed',
-          minPrice: '',
-          maxPrice: '',
-          estimatedDuration: '',
-          serviceAreas: ['All Cities'],
-          metaTitle: '',
-          metaDescription: '',
-          isActive: true 
-        });
-        setImageFile(null);
-        setImagePreview('');
-        fetchCategories(); // Refresh the categories list
+        fetchCategories();
       }
     } catch (error) {
-      console.error('Error saving category:', error);
-      console.error('Error response:', error.response?.data);
       setError(error.response?.data?.message || 'Failed to save category');
     } finally {
       setSubmitting(false);
@@ -189,511 +194,302 @@ const ServiceCategories = () => {
 
   const openModal = () => {
     setShowModal(true);
-    setError('');
     setEditingCategory(null);
-    setFormData({ 
-      name: '', 
-      slug: '',
-      description: '', 
-      icon: '',
-      image: '',
-      pricingType: 'fixed',
-      minPrice: '',
-      maxPrice: '',
-      estimatedDuration: '',
-      serviceAreas: ['All Cities'],
-      metaTitle: '',
-      metaDescription: '',
-      isActive: true 
+    setFormData({
+      name: '', slug: '', description: '', icon: '', image: '', pricingType: 'fixed',
+      minPrice: '', maxPrice: '', estimatedDuration: '', serviceAreas: ['All Cities'],
+      metaTitle: '', metaDescription: '', isActive: true
     });
     setImageFile(null);
     setImagePreview('');
   };
 
   const openEditModal = (category) => {
-    console.log('Opening edit modal for category:', category);
     setShowModal(true);
-    setError('');
     setEditingCategory(category);
-    setFormData({ 
-      name: category.name || '', 
-      slug: category.slug || '',
-      description: category.description || '', 
-      icon: category.icon || '',
-      image: category.image || '',
-      pricingType: category.pricingType || 'fixed',
-      minPrice: category.minPrice || '',
-      maxPrice: category.maxPrice || '',
-      estimatedDuration: category.estimatedDuration || '',
-      serviceAreas: category.serviceAreas || ['All Cities'],
-      metaTitle: category.metaTitle || '',
-      metaDescription: category.metaDescription || '',
-      isActive: category.isActive !== undefined ? category.isActive : true
+    setFormData({
+      name: category.name || '', slug: category.slug || '', description: category.description || '',
+      icon: category.icon || '', image: category.image || '', pricingType: category.pricingType || 'fixed',
+      minPrice: category.minPrice || '', maxPrice: category.maxPrice || '', estimatedDuration: category.estimatedDuration || '',
+      serviceAreas: category.serviceAreas || ['All Cities'], metaTitle: category.metaTitle || '',
+      metaDescription: category.metaDescription || '', isActive: category.isActive !== undefined ? category.isActive : true
     });
     setImageFile(null);
-    
-    // Set image preview with proper URL handling
-    if (category.image) {
-      const imageUrl = category.image.startsWith('http') ? category.image : `${API_CONFIG.BASE_URL}${category.image}`;
-      console.log('Setting image preview to:', imageUrl);
-      setImagePreview(imageUrl);
-    } else {
-      setImagePreview('');
-    }
+    setImagePreview(category.image ? (category.image.startsWith('http') ? category.image : `${API_CONFIG.BASE_URL}${category.image}`) : '');
   };
 
-  const deleteCategory = async (categoryId) => {
-    if (!window.confirm('Are you sure you want to delete this category? This action cannot be undone.')) {
-      return;
-    }
-
+  const deleteCategory = async (id) => {
+    if (!window.confirm('Delete this category?')) return;
     try {
       const token = localStorage.getItem('token') || localStorage.getItem('authToken');
-      const response = await axios.delete(`${API_CONFIG.BASE_URL}/api/urban-services/categories/${categoryId}`, {
+      await axios.delete(`${API_CONFIG.BASE_URL}/api/urban-services/categories/${id}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
-
-      if (response.data.success) {
-        fetchCategories(); // Refresh the categories list
-      }
+      fetchCategories();
     } catch (error) {
-      console.error('Error deleting category:', error);
-      alert('Failed to delete category. Please try again.');
+      alert('Delete failed');
     }
   };
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-      </div>
-    );
-  }
+  const filteredCategories = categories.filter(cat =>
+    cat.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    cat.slug.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
-    <div className="p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Service Categories</h1>
-        <button 
-          onClick={openModal}
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
-        >
-          Add Category
-        </button>
+    <div className="min-h-screen bg-[#F8FAFC] p-4 md:p-8">
+      {/* Header Section */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+        <div>
+          <h1 className="text-3xl font-black text-gray-900 tracking-tight">Urban Service Category</h1>
+          <p className="text-gray-500 font-medium">Manage your service catalog and hero sections</p>
+        </div>
+        <div className="flex gap-3">
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={syncDefaultCategories}
+            disabled={syncing}
+            className="flex items-center gap-2 bg-white text-gray-700 px-6 py-3 rounded-2xl font-bold shadow-sm border border-gray-200 hover:bg-gray-50 transition-all disabled:opacity-50"
+          >
+            <FaSync className={`${syncing ? 'animate-spin' : ''}`} />
+            {syncing ? 'Syncing...' : 'Sync Hero Categories'}
+          </motion.button>
+          <motion.button
+            whileHover={{ scale: 1.02, backgroundColor: '#1d4ed8' }}
+            whileTap={{ scale: 0.98 }}
+            onClick={openModal}
+            className="flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-2xl font-bold shadow-lg shadow-blue-200 transition-all"
+          >
+            <FaPlus />
+            Add Category
+          </motion.button>
+        </div>
       </div>
 
-      <div className="bg-white rounded-lg shadow overflow-hidden">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Image
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Category Name
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Description
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Services
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Status
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Actions
-              </th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {categories.length === 0 ? (
-              <tr>
-                <td colSpan="6" className="px-6 py-12 text-center">
-                  <div className="text-gray-500">
-                    <div className="text-lg font-medium mb-2">No categories found</div>
-                    <div className="text-sm">Click "Add Category" to create your first service category</div>
+      {/* Hero Categories Status Grid */}
+      <div className="mb-10">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center text-amber-600">
+            <FaCrown size={18} />
+          </div>
+          <h2 className="text-xl font-bold text-gray-800">Hero Section Status</h2>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
+          {defaultHeroCategories.map((item, idx) => {
+            const exists = categories.find(c => c.slug === item.slug);
+            return (
+              <div
+                key={idx}
+                className={`p-4 rounded-3xl border ${exists ? 'bg-white border-blue-100' : 'bg-gray-50 border-dashed border-gray-300'} transition-all flex flex-col items-center text-center`}
+              >
+                <div className={`w-12 h-12 rounded-2xl ${item.color} flex items-center justify-center mb-3 text-xl shadow-sm overflow-hidden`}>
+                  {exists?.image ? (
+                    <img src={exists.image.startsWith('http') ? exists.image : `${API_CONFIG.BASE_URL}${exists.image}`} className="w-full h-full object-cover rounded-2xl" alt="" />
+                  ) : <span className="uppercase">{item.icon[0]}</span>}
+                </div>
+                <p className="text-[10px] font-black uppercase tracking-wider text-gray-400 mb-1">{item.name.split(' ')[0]}</p>
+                {exists ? (
+                  <div className="flex items-center gap-1 text-[10px] font-bold text-green-500">
+                    <FaCheckCircle /> Synced
                   </div>
-                </td>
-              </tr>
-            ) : (
-              categories.map((category) => (
-                <React.Fragment key={category._id}>
-                  <tr>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      {category.image ? (
-                        <img 
-                          src={category.image.startsWith('http') ? category.image : `${API_CONFIG.BASE_URL}${category.image}`}
-                          alt={category.name}
-                          className="h-10 w-10 rounded-full object-cover"
-                          onError={(e) => {
-                            e.target.onerror = null;
-                            e.target.style.display = 'none';
-                            e.target.nextSibling.style.display = 'flex';
-                          }}
-                        />
-                      ) : null}
-                      <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center" style={{display: category.image ? 'none' : 'flex'}}>
-                        <span className="text-gray-500 text-xs">No img</span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">{category.name}</div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="text-sm text-gray-500">{category.description || 'No description'}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <button
-                        onClick={() => toggleCategoryExpansion(category._id)}
-                        className="text-blue-600 hover:text-blue-800 text-sm font-medium"
-                      >
-                        {expandedCategories.has(category._id) ? 'Hide' : 'Show'} Services
-                      </button>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                        category.isActive 
-                          ? 'bg-green-100 text-green-800' 
-                          : 'bg-red-100 text-red-800'
-                      }`}>
-                        {category.isActive ? 'Active' : 'Inactive'}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <button 
-                        onClick={() => openEditModal(category)}
-                        className="text-indigo-600 hover:text-indigo-900 mr-3"
-                      >
-                        Edit
-                      </button>
-                      <button 
-                        onClick={() => deleteCategory(category._id)}
-                        className="text-red-600 hover:text-red-900"
-                      >
-                        Delete
-                      </button>
-                    </td>
-                  </tr>
-                  
-                  {/* Services Row */}
-                  {expandedCategories.has(category._id) && (
-                    <tr>
-                      <td colSpan="6" className="px-6 py-4 bg-gray-50">
-                        <div className="space-y-3">
-                          <h4 className="text-sm font-semibold text-gray-900 mb-3">Services in {category.name}</h4>
-                          {categoryServices[category._id] && categoryServices[category._id].length > 0 ? (
-                            <div className="grid grid-cols-1 gap-3">
-                              {categoryServices[category._id].map((service) => (
-                                <div key={service._id} className="bg-white p-3 rounded-lg border border-gray-200">
-                                  <div className="flex items-start space-x-3">
-                                    {service.image && (
-                                      <img 
-                                        src={service.image.startsWith('http') ? service.image : `${API_CONFIG.BASE_URL}${service.image}`}
-                                        alt={service.name}
-                                        className="h-12 w-12 rounded object-cover"
-                                      />
-                                    )}
-                                    <div className="flex-1">
-                                      <h5 className="text-sm font-medium text-gray-900">{service.name}</h5>
-                                      <p className="text-xs text-gray-600 mt-1">{service.shortDescription || service.description?.substring(0, 100)}...</p>
-                                      <div className="flex items-center space-x-4 mt-2">
-                                        <span className="text-xs font-medium text-green-600">
-                                          ₹{service.pricing?.basePrice || 0}
-                                        </span>
-                                        <span className="text-xs text-gray-500">
-                                          {service.duration || 60} {service.durationUnit || 'minutes'}
-                                        </span>
-                                        {service.popular && (
-                                          <span className="text-xs px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full">
-                                            Popular
-                                          </span>
-                                        )}
-                                        <span className={`text-xs px-2 py-1 rounded-full ${
-                                          service.isActive 
-                                            ? 'bg-green-100 text-green-800' 
-                                            : 'bg-red-100 text-red-800'
-                                        }`}>
-                                          {service.isActive ? 'Active' : 'Inactive'}
-                                        </span>
-                                      </div>
-                                    </div>
-                                  </div>
-                                </div>
-                              ))}
+                ) : (
+                  <div className="flex items-center gap-1 text-[10px] font-bold text-amber-500">
+                    <FaExclamationCircle /> Missing
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Categories Table Container */}
+      <div className="bg-white rounded-[2.5rem] shadow-xl shadow-blue-900/5 border border-gray-100 overflow-hidden">
+        <div className="p-6 md:p-8 border-b border-gray-50 flex flex-col md:flex-row justify-between items-center gap-4">
+          <h3 className="text-xl font-black text-gray-900">All Categories</h3>
+          <div className="relative w-full md:w-80">
+            <FaSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Search categories..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-12 pr-4 py-3 bg-gray-50 border-none rounded-2xl text-sm font-medium focus:ring-2 focus:ring-blue-100 outline-none transition-all"
+            />
+          </div>
+        </div>
+
+        {loading ? (
+          <div className="p-20 flex justify-center"><div className="w-10 h-10 border-4 border-blue-100 border-t-blue-600 rounded-full animate-spin"></div></div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="bg-gray-50/50">
+                  <th className="px-8 py-5 text-left text-xs font-black text-gray-400 uppercase tracking-[0.2em]">Info</th>
+                  <th className="px-8 py-5 text-left text-xs font-black text-gray-400 uppercase tracking-[0.2em]">Slug & Icon</th>
+                  <th className="px-8 py-5 text-left text-xs font-black text-gray-400 uppercase tracking-[0.2em]">Pricing</th>
+                  <th className="px-8 py-5 text-left text-xs font-black text-gray-400 uppercase tracking-[0.2em]">Status</th>
+                  <th className="px-8 py-5 text-right text-xs font-black text-gray-400 uppercase tracking-[0.2em]">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-50">
+                {filteredCategories.map((category) => {
+                  const isHero = defaultHeroCategories.some(h => h.slug === category.slug);
+                  return (
+                    <tr key={category._id} className="hover:bg-blue-50/30 transition-colors group">
+                      <td className="px-8 py-6">
+                        <div className="flex items-center gap-4">
+                          <div className="w-14 h-14 rounded-2xl bg-gray-100 overflow-hidden shadow-sm flex items-center justify-center">
+                            {category.image ? (
+                              <img
+                                src={category.image.startsWith('http') ? category.image : `${API_CONFIG.BASE_URL}${category.image}`}
+                                className="w-full h-full object-cover"
+                                alt=""
+                              />
+                            ) : <FaImage className="text-gray-300 text-xl" />}
+                          </div>
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <span className="font-bold text-gray-900 group-hover:text-blue-600 transition-colors">{category.name}</span>
+                              {isHero && <span className="px-2 py-0.5 bg-amber-100 text-amber-600 text-[9px] font-black rounded-full uppercase">Hero</span>}
                             </div>
-                          ) : (
-                            <div className="text-center py-4 text-gray-500 text-sm">
-                              No services found in this category
-                            </div>
-                          )}
+                            <p className="text-xs text-gray-400 font-medium line-clamp-1">{category.description || 'No description provided'}</p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-8 py-6">
+                        <code className="text-[11px] font-bold text-gray-500 bg-gray-100 px-2.5 py-1 rounded-lg">/{category.slug}</code>
+                        <p className="text-[10px] text-gray-400 mt-1 uppercase font-black tracking-widest">{category.icon || 'no-icon'}</p>
+                      </td>
+                      <td className="px-8 py-6">
+                        <p className="text-sm font-black text-gray-900 leading-none">₹{category.minPrice}</p>
+                        <p className="text-[10px] text-gray-400 font-bold mt-1 uppercase tracking-tighter">Starting Price</p>
+                      </td>
+                      <td className="px-8 py-6">
+                        <span className={`px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wider ${category.isActive ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'}`}>
+                          {category.isActive ? 'Active' : 'Hidden'}
+                        </span>
+                      </td>
+                      <td className="px-8 py-6 text-right">
+                        <div className="flex justify-end gap-2">
+                          <button
+                            onClick={() => openEditModal(category)}
+                            className="p-3 text-blue-600 hover:bg-blue-50 rounded-xl transition-all"
+                            title="Edit"
+                          >
+                            <FaEdit size={16} />
+                          </button>
+                          <button
+                            onClick={() => deleteCategory(category._id)}
+                            className="p-3 text-red-600 hover:bg-red-50 rounded-xl transition-all"
+                            title="Delete"
+                          >
+                            <FaTrash size={16} />
+                          </button>
                         </div>
                       </td>
                     </tr>
-                  )}
-                </React.Fragment>
-              ))
-            )}
-          </tbody>
-        </table>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
 
-      {/* Add Category Modal */}
-      {showModal && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
-            <div className="mt-3">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">
-              {editingCategory ? 'Edit Category' : 'Add New Category'}
-            </h3>
-              
-              {error && (
-                <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
-                  {error}
-                </div>
-              )}
-
-              <form onSubmit={handleSubmit}>
-                <div className="mb-4">
-                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="name">
-                    Category Name*
-                  </label>
-                  <input
-                    type="text"
-                    id="name"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleInputChange}
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    required
-                  />
+      {/* Enhanced Modal */}
+      <AnimatePresence>
+        {showModal && (
+          <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 z-[100]">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="bg-white rounded-[3rem] w-full max-w-2xl shadow-2xl overflow-hidden"
+            >
+              <div className="p-8 md:p-10 max-h-[90vh] overflow-y-auto">
+                <div className="flex justify-between items-center mb-10">
+                  <h2 className="text-2xl font-black text-gray-900">{editingCategory ? 'Edit Category' : 'New Category'}</h2>
+                  <button onClick={() => setShowModal(false)} className="text-gray-400 hover:text-black transition-colors font-black uppercase text-xs tracking-widest">Close</button>
                 </div>
 
-                <div className="mb-4">
-                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="slug">
-                    Slug*
-                  </label>
-                  <input
-                    type="text"
-                    id="slug"
-                    name="slug"
-                    value={formData.slug}
-                    onChange={handleInputChange}
-                    placeholder="category-name-url"
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    required
-                  />
-                </div>
+                {error && <div className="mb-6 p-4 bg-red-50 border border-red-100 text-red-600 rounded-2xl text-sm font-bold flex items-center gap-3">
+                  <FaExclamationCircle /> {error}
+                </div>}
 
-                <div className="mb-4">
-                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="description">
-                    Description*
-                  </label>
-                  <textarea
-                    id="description"
-                    name="description"
-                    value={formData.description}
-                    onChange={handleInputChange}
-                    rows="3"
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    required
-                  />
-                </div>
-
-                <div className="mb-4">
-                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="icon">
-                    Icon
-                  </label>
-                  <input
-                    type="text"
-                    id="icon"
-                    name="icon"
-                    value={formData.icon}
-                    onChange={handleInputChange}
-                    placeholder="ac, plumbing, electrician, etc."
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                  />
-                </div>
-
-                <div className="mb-4">
-                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="pricingType">
-                    Pricing Type*
-                  </label>
-                  <select
-                    id="pricingType"
-                    name="pricingType"
-                    value={formData.pricingType}
-                    onChange={handleInputChange}
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    required
-                  >
-                    <option value="fixed">Fixed Price</option>
-                    <option value="hourly">Hourly Rate</option>
-                    <option value="quote">Quote Based</option>
-                  </select>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4 mb-4">
-                  <div>
-                    <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="minPrice">
-                      Minimum Price*
-                    </label>
-                    <input
-                      type="number"
-                      id="minPrice"
-                      name="minPrice"
-                      value={formData.minPrice}
-                      onChange={handleInputChange}
-                      placeholder="299"
-                      className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="maxPrice">
-                      Maximum Price*
-                    </label>
-                    <input
-                      type="number"
-                      id="maxPrice"
-                      name="maxPrice"
-                      value={formData.maxPrice}
-                      onChange={handleInputChange}
-                      placeholder="1999"
-                      className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                      required
-                    />
-                  </div>
-                </div>
-
-                <div className="mb-4">
-                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="estimatedDuration">
-                    Estimated Duration (minutes)*
-                  </label>
-                  <input
-                    type="number"
-                    id="estimatedDuration"
-                    name="estimatedDuration"
-                    value={formData.estimatedDuration}
-                    onChange={handleInputChange}
-                    placeholder="90"
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    required
-                  />
-                </div>
-
-                <div className="mb-4">
-                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="serviceAreas">
-                    Service Areas*
-                  </label>
-                  <input
-                    type="text"
-                    id="serviceAreas"
-                    name="serviceAreas"
-                    value={formData.serviceAreas.join(', ')}
-                    onChange={(e) => setFormData(prev => ({
-                      ...prev,
-                      serviceAreas: e.target.value.split(',').map(area => area.trim()).filter(area => area)
-                    }))}
-                    placeholder="All Cities, Chennai, Bangalore"
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    required
-                  />
-                </div>
-
-                <div className="mb-4">
-                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="metaTitle">
-                    Meta Title
-                  </label>
-                  <input
-                    type="text"
-                    id="metaTitle"
-                    name="metaTitle"
-                    value={formData.metaTitle}
-                    onChange={handleInputChange}
-                    placeholder="SEO Title"
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                  />
-                </div>
-
-                <div className="mb-4">
-                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="metaDescription">
-                    Meta Description
-                  </label>
-                  <textarea
-                    id="metaDescription"
-                    name="metaDescription"
-                    value={formData.metaDescription}
-                    onChange={handleInputChange}
-                    rows="2"
-                    placeholder="SEO Description"
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                  />
-                </div>
-
-                <div className="mb-4">
-                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="image">
-                    Category Image
-                  </label>
-                  <input
-                    type="file"
-                    id="image"
-                    name="image"
-                    accept="image/*"
-                    onChange={handleImageChange}
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                  />
-                  {imagePreview && (
-                    <div className="mt-2">
-                      <img 
-                        src={imagePreview} 
-                        alt="Preview" 
-                        className="h-20 w-20 object-cover rounded"
-                        onError={(e) => {
-                          console.error('Image preview failed to load:', imagePreview);
-                          e.target.onerror = null;
-                          setImagePreview('');
-                        }}
-                      />
-                      <p className="text-xs text-gray-500 mt-1">Current image</p>
+                <form onSubmit={handleSubmit} className="space-y-6">
+                  <div className="grid grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Category Name</label>
+                      <input type="text" name="name" value={formData.name} onChange={handleInputChange} className="w-full p-4 bg-gray-50 border-none rounded-2xl font-bold focus:ring-2 focus:ring-blue-100 transition-all outline-none" required />
                     </div>
-                  )}
-                </div>
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Slug (URL)</label>
+                      <input type="text" name="slug" value={formData.slug} onChange={handleInputChange} className="w-full p-4 bg-gray-50 border-none rounded-2xl font-bold focus:ring-2 focus:ring-blue-100 transition-all outline-none" required />
+                    </div>
+                  </div>
 
-                <div className="mb-4">
-                  <label className="flex items-center">
-                    <input
-                      type="checkbox"
-                      name="isActive"
-                      checked={formData.isActive}
-                      onChange={handleInputChange}
-                      className="mr-2"
-                    />
-                    <span className="text-sm font-medium text-gray-700">Active</span>
-                  </label>
-                </div>
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Description</label>
+                    <textarea name="description" value={formData.description} onChange={handleInputChange} rows="3" className="w-full p-4 bg-gray-50 border-none rounded-2xl font-medium focus:ring-2 focus:ring-blue-100 transition-all outline-none resize-none" required />
+                  </div>
 
-                <div className="flex justify-end space-x-3">
-                  <button
-                    type="button"
-                    onClick={() => setShowModal(false)}
-                    className="px-4 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={submitting}
-                    className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
-                  >
-                    {submitting ? (editingCategory ? 'Updating...' : 'Creating...') : (editingCategory ? 'Update Category' : 'Create Category')}
-                  </button>
-                </div>
-              </form>
-            </div>
+                  <div className="grid grid-cols-3 gap-6">
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Icon Key</label>
+                      <input type="text" name="icon" value={formData.icon} onChange={handleInputChange} className="w-full p-4 bg-gray-50 border-none rounded-2xl font-bold focus:ring-2 focus:ring-blue-100 outline-none" />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Min Price (₹)</label>
+                      <input type="number" name="minPrice" value={formData.minPrice} onChange={handleInputChange} className="w-full p-4 bg-gray-50 border-none rounded-2xl font-bold focus:ring-2 focus:ring-blue-100 outline-none" required />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Duration (Min)</label>
+                      <input type="number" name="estimatedDuration" value={formData.estimatedDuration} onChange={handleInputChange} className="w-full p-4 bg-gray-50 border-none rounded-2xl font-bold focus:ring-2 focus:ring-blue-100 outline-none" required />
+                    </div>
+                  </div>
+
+                  <div className="bg-gray-50 p-6 rounded-[2rem] border border-gray-100">
+                    <div className="flex items-center justify-between mb-4">
+                      <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Category Photo</label>
+                      {imagePreview && <button type="button" onClick={() => { setImageFile(null); setImagePreview(''); setFormData({ ...formData, image: '' }) }} className="text-[9px] font-black text-red-500 uppercase tracking-widest">Remove</button>}
+                    </div>
+                    <div className="flex items-center gap-6">
+                      <div className="w-24 h-24 rounded-3xl bg-white border border-gray-100 shadow-sm overflow-hidden flex items-center justify-center">
+                        {imagePreview ? <img src={imagePreview} className="w-full h-full object-cover" alt="" /> : <FaImage className="text-gray-200 text-3xl" />}
+                      </div>
+                      <div className="flex-1">
+                        <input type="file" id="modal-image" className="hidden" accept="image/*" onChange={handleImageChange} />
+                        <label htmlFor="modal-image" className="inline-flex items-center gap-2 px-6 py-3 bg-white border border-gray-200 rounded-xl text-xs font-black uppercase tracking-widest cursor-pointer hover:bg-gray-50 transition-all shadow-sm">
+                          <FaPlus /> {imagePreview ? 'Change Photo' : 'Upload Photo'}
+                        </label>
+                        <p className="text-[10px] text-gray-400 font-bold mt-2 tracking-tighter">Recommended size: 512x512px. Max 5MB.</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex justify-between items-center pt-4">
+                    <label className="flex items-center gap-3 cursor-pointer">
+                      <input type="checkbox" name="isActive" checked={formData.isActive} onChange={handleInputChange} className="w-5 h-5 rounded-lg text-blue-600 focus:ring-blue-100 border-none bg-gray-100" />
+                      <span className="text-sm font-bold text-gray-700">Display this category on website</span>
+                    </label>
+                    <button
+                      type="submit"
+                      disabled={submitting}
+                      className="flex items-center gap-3 bg-blue-600 text-white px-10 py-5 rounded-3xl font-black shadow-xl shadow-blue-200 hover:bg-blue-700 transition-all disabled:opacity-50"
+                    >
+                      {submitting ? 'Processing...' : (editingCategory ? 'Update Category' : 'Create Category')}
+                      {!submitting && <FaArrowRight />}
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </motion.div>
           </div>
-        </div>
-      )}
+        )}
+      </AnimatePresence>
     </div>
   );
 };
